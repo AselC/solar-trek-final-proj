@@ -1,4 +1,3 @@
-// components/Header.js
 export default function Header() {
   return (
     <header className="text-center mb-8">
