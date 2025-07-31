@@ -65,7 +65,7 @@ export default function Page() {
             <p className="font-orbitron text-xl mb-4 text-earth">Sign in to continue</p>
             <button
               onClick={handleGitHubLogin}
-              className="w-full bg-earth hover:bg-black text-white py-3 px-6 rounded-xl font-medium shadow-lg transition"
+              className="w-full bg-white text-earth hover:bg-black hover:text-white py-3 px-6 rounded-xl font-medium shadow-lg transition"
             >
               Sign in with GitHub
             </button>

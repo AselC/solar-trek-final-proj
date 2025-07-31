@@ -1,3 +1,4 @@
+// tailwind.config.js
 module.exports = {
   content: [
     './app/**/*.{js,ts,jsx,tsx}',
@@ -6,8 +7,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        orbitron: ['Orbitron', 'sans-serif'],
-        inter: ['Inter', 'sans-serif'],
+        orbitron: ['var(--font-orbitron)', 'Orbitron', 'sans-serif'],
+        inter: ['var(--font-inter)', 'Inter', 'sans-serif'],
       },
       colors: {
         peach: '#FFDAB9',
@@ -19,4 +20,4 @@ module.exports = {
     },
   },
   plugins: [],
-}
+};
