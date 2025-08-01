@@ -7,7 +7,7 @@ export default function Footer() {
           <span className="text-2xl">☀️</span>
         </div>
         <p className="font-inter text-sm text-earth/60">
-          <p>Bringing you closer to your daily rhythm</p>
+          Bringing you closer to your daily rhythm
         </p>
       </div>
     </footer>
