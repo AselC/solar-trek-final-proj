@@ -1,33 +1,71 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../components/header';
 import Footer from '../components/footer';
 import LocationSearchInput from '../components/locationSeachInput';
 import TimeCard from '../components/timeCard';
+import SavedLocations from '../components/savedLocations';
 import fetchSunData from '../lib/fetchSunData';
+import fetchWeather from '../lib/fetchWeather';
 import useAuthCheck from '../lib/useAuthCheck';
 import { GithubAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { saveLocation, getSavedLocations, deleteLocation } from '../lib/savedLocationsService';
+import { Bookmark } from 'lucide-react';
 
 export default function Page() {
   const [selected, setSelected] = useState(null);
   const [sunrise, setSunrise] = useState('');
   const [sunset, setSunset] = useState('');
   const [dayLength, setDayLength] = useState('');
+  const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [savedLocations, setSavedLocations] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   const { user, loading: authLoading } = useAuthCheck();
+
+  useEffect(() => {
+    if (user) {
+      loadSavedLocations();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (selected) {
+      getData(); // ✅ Auto-fetch when a location is selected
+    }
+  }, [selected]);
+
+  const loadSavedLocations = async () => {
+    try {
+      const data = await getSavedLocations(user.uid);
+      setSavedLocations(data);
+    } catch (error) {
+      console.error('Failed to load saved locations:', error);
+    }
+  };
 
   const getData = async () => {
     if (!selected) return;
     setLoading(true);
+
     const { lat, lng } = selected;
-    const data = await fetchSunData(lat, lng);
-    setSunrise(data.sunrise);
-    setSunset(data.sunset);
-    setDayLength(data.dayLength);
-    setLoading(false);
+
+    try {
+      const sunData = await fetchSunData(lat, lng);
+      setSunrise(sunData.sunrise);
+      setSunset(sunData.sunset);
+      setDayLength(sunData.dayLength);
+
+      const weatherData = await fetchWeather(lat, lng);
+      setWeather(weatherData);
+    } catch (error) {
+      console.error('Data fetch failed:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGitHubLogin = async () => {
@@ -44,6 +82,29 @@ export default function Page() {
       await signOut(auth);
     } catch (error) {
       console.error('Sign out failed:', error.message);
+    }
+  };
+
+  const handleSaveLocation = async () => {
+    if (!selected || !user) return;
+    setSaving(true);
+
+    try {
+      await saveLocation(user.uid, selected);
+      await loadSavedLocations();
+    } catch (error) {
+      console.error('Failed to save location:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteLocation = async (docId) => {
+    try {
+      await deleteLocation(docId);
+      await loadSavedLocations();
+    } catch (error) {
+      console.error('Failed to delete location:', error);
     }
   };
 
@@ -71,28 +132,37 @@ export default function Page() {
             </button>
           </div>
         ) : (
-          <div className="bg-white/60 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-white/30 ring-1 ring-white/20">
-            <LocationSearchInput onSelect={setSelected} />
+          <div className="bg-white/80 backdrop-blur-xl p-6 rounded-2xl shadow-xl w-full max-w-md text-center border border-neutral-200">
+            <div className="relative">
+              <LocationSearchInput onSelect={setSelected} />
+              {selected && (
+                <button
+                  onClick={handleSaveLocation}
+                  disabled={saving}
+                  className="absolute top-2 right-2 p-2 bg-transparent hover:scale-110 transition-transform"
+                  title="Save this location"
+                >
+                  <Bookmark size={20} className="text-earth" />
+                </button>
+              )}
+            </div>
+
+            <SavedLocations
+              savedLocations={savedLocations}
+              onSelect={setSelected}
+              onDelete={handleDeleteLocation}
+            />
+
             <TimeCard
               sunrise={sunrise}
               sunset={sunset}
               dayLength={dayLength}
+              weather={weather}
             />
-            <button
-              onClick={getData}
-              disabled={loading || !selected}
-              className={`mt-6 w-full py-3 rounded-xl font-medium text-white ${
-                loading || !selected
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600'
-              }`}
-            >
-              {loading ? 'Loading...' : 'Get Times'}
-            </button>
 
             <button
               onClick={handleSignOut}
-              className="mt-4 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-medium shadow-md"
+              className="mt-6 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-medium shadow-md"
             >
               Sign Out
             </button>
