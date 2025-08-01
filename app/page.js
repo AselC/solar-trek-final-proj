@@ -71,7 +71,7 @@ export default function Page() {
             </button>
           </div>
         ) : (
-          <div className="bg-white/30 backdrop-blur-lg p-6 rounded-2xl shadow-xl w-full max-w-md text-center border border-white/50">
+          <div className="bg-white/60 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-white/30 ring-1 ring-white/20">
             <LocationSearchInput onSelect={setSelected} />
             <TimeCard
               sunrise={sunrise}
