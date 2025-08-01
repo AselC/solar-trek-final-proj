@@ -1,11 +1,10 @@
-// components/savedLocations.jsx
 export default function SavedLocations({ savedLocations, onSelect, onDelete }) {
   if (!savedLocations || savedLocations.length === 0)
     return <p className="text-sm text-gray-600 mb-6">No saved locations yet.</p>;
 
   return (
-    <div className="mt-6 mb-6 text-left"> {/* ✅ Added mb-6 for spacing below */}
-      <h3 className="text-lg font-bold mb-2 text-earth">Saved Locations</h3>
+    <div className="mt-6 mb-6 text-left"> 
+      <h3 className="text-xl font-bold text-left mb-4 px-1 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600">📍 Saved Locations</h3>
       <ul className="space-y-2">
         {savedLocations.map((loc) => (
           <li

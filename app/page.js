@@ -13,6 +13,7 @@ import { GithubAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { saveLocation, getSavedLocations, deleteLocation } from '../lib/savedLocationsService';
 import { Bookmark } from 'lucide-react';
+import { timezones } from '../lib/timezones';
 
 export default function Page() {
   const [selected, setSelected] = useState(null);
@@ -23,6 +24,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [savedLocations, setSavedLocations] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [timezone, setTimezone] = useState('UTC');
 
   const { user, loading: authLoading } = useAuthCheck();
 
@@ -34,9 +36,9 @@ export default function Page() {
 
   useEffect(() => {
     if (selected) {
-      getData(); // ✅ Auto-fetch when a location is selected
+      getData();
     }
-  }, [selected]);
+  }, [selected, timezone]);
 
   const loadSavedLocations = async () => {
     try {
@@ -54,7 +56,7 @@ export default function Page() {
     const { lat, lng } = selected;
 
     try {
-      const sunData = await fetchSunData(lat, lng);
+      const sunData = await fetchSunData(lat, lng, timezone);
       setSunrise(sunData.sunrise);
       setSunset(sunData.sunset);
       setDayLength(sunData.dayLength);
@@ -146,6 +148,25 @@ export default function Page() {
                 </button>
               )}
             </div>
+
+            <div className="mt-4 mb-4 text-left">
+              <h3 className="text-xl font-bold text-left mb-2 px-1 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600">
+                Select Timezone
+              </h3>
+              <select
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+                className="w-full p-2 rounded-lg border border-gray-300 text-sm text-earth shadow-sm"
+              >
+                {Array.isArray(timezones) &&
+                  timezones.map((tz) => (
+                    <option key={tz} value={tz}>
+                      {tz}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
 
             <SavedLocations
               savedLocations={savedLocations}
